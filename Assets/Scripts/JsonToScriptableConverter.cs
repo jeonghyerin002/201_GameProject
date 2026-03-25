@@ -4,6 +4,24 @@ using UnityEditor;
 using System.IO;
 using System.Collections.Generic;
 using Newtonsoft.Json;
+using System;
+
+public enum ConversionType
+{ 
+    Items,
+    Dialogs
+}
+[Serializable]
+public class DialogRowData
+{
+    public int? id;
+    public string characterName;
+    public string text;
+    public int? nextId;
+    public string protraitPath;
+    public string choiceText;
+    public int? choiceNextId;
+}
 
 public class JsonToScriptableConverter : EditorWindow
 {
