@@ -9,7 +9,7 @@ public class DialogSO : ScriptableObject
     public string text;
     public int nextId;
 
-    //public List<DialogChoiceSO> choices = new List <DialogChoiceSO>();
+    public List<DialogChoiceSO> choices = new List <DialogChoiceSO>();
     public Sprite portrait;
 
     public string portraitPath;
