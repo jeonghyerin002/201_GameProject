@@ -70,7 +70,15 @@ public class JsonToScriptableConverter : EditorWindow
                 EditorUtility.DisplayDialog("Error", "Pease Select a JSON file first", "OK");
                 return;
             }
-            ConverterJsonToScriptableObjects();
+            switch (conversionType)
+            {
+                case ConversionType.Items:
+                    ConverterJsonToScriptableObjects();
+                    break;
+                case ConversionType.Dialogs:
+                    ConverterJsonToScriptableObjects();
+                    break;
+            }
         }
             
     }
@@ -168,6 +176,9 @@ public class JsonToScriptableConverter : EditorWindow
             //대화 항목 생성
             foreach(var rowData in rowDataList)
             {
+                if (!rowData.id.HasValue)
+                    continue;
+
                 //id 있는 행을 대화로 처리
                 DialogSO dialogSO = ScriptableObject.CreateInstance<DialogSO>();
 
@@ -223,6 +234,7 @@ public class JsonToScriptableConverter : EditorWindow
 
                         //선택지 에셋 저장
                         string choiceAssetPath = $"{outputFolder}/Choice_{parentId}_{parentDialog.choices.Count + 1}.asset";
+                        AssetDatabase.CreateAsset(choiceSO, choiceAssetPath);
                         EditorUtility.SetDirty(choiceSO);
                         parentDialog.choices.Add(choiceSO);
                     }
@@ -243,6 +255,17 @@ public class JsonToScriptableConverter : EditorWindow
                 EditorUtility.SetDirty (dialog);
             }
             //데이터 베이스 생성 해야함.
+            if (createdDatabase && creatDialogs.Count > 0)
+            {
+                DialogDatabaseSO database = ScriptableObject.CreateInstance<DialogDatabaseSO>();
+                database.dialogs = creatDialogs;
+
+                AssetDatabase.CreateAsset(database, $"{outputFolder}/DialogDatabase.assets");
+                EditorUtility.SetDirty(database);
+            }
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
+            EditorUtility.DisplayDialog("Success", $"created {creatDialogs.Count} dialogMap scriptable object!", "OK");
         }
         catch (System.Exception e)
         {
