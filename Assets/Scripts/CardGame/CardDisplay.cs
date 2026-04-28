@@ -12,7 +12,7 @@ public class CardDisplay : MonoBehaviour
     public TextMeshPro attackText;
     public TextMeshPro descriptionText;
 
-    private bool isDragging = false;
+    public bool isDragging = false;
     private Vector3 originalPosition;
 
     public LayerMask enemyLayer;
@@ -42,6 +42,12 @@ public class CardDisplay : MonoBehaviour
     }
     private void OnMouseUp()
     {
+        if (CardManager.Instance.playerStats == null || CardManager.Instance.playerStats.currentMana < cardData.manaCost)
+        {
+            Debug.Log($"마나가 부족합니다. (필요 : {cardData.manaCost}, 현재 : {CardManager.Instance.playerStats.currentMana}");
+            transform.position = originalPosition;
+            return;
+        }
         isDragging = false;
 
         //레이캐스트로 타겟 감지
@@ -90,6 +96,32 @@ public class CardDisplay : MonoBehaviour
                     Debug.Log("이 카드는 플레이어에게 사용할 수 없습니다.");
                 }
             }
+        }
+        else if (CardManager.Instance != null)
+        {
+            //버린 카드 더미 근처에 드롭 했는지 검사
+            float distToDiscard = Vector3.Distance(transform.position, CardManager.Instance.discardPosition.position);
+            if (distToDiscard < 0.2f)
+            {
+                //카드 버리기
+                CardManager.Instance.DiscardCard(cardIndex);
+                return;
+            }
+        }
+        if (!cardUsed)
+        {
+            transform.position = originalPosition;
+            CardManager.Instance.ArrangeHand();
+        }
+        else
+        {
+            //카드를 사용했다면 버린 카드 더미로 이동
+            if (CardManager.Instance != null)
+                CardManager.Instance.DiscardCard(cardIndex);
+
+            //카드 사용시 마나 소모 (카드가 성공적으로 사용된 후 추가
+            CardManager.Instance.playerStats.UseMana(cardData.manaCost);
+            Debug.Log($"마나를 {cardData.manaCost} 사용 했습니다.");
         }
 
         //카드를 사용하지 않으면 우너래 위치로 되돌리기
